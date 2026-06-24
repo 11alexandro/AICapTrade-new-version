@@ -1,0 +1,6 @@
+{
+  "name": "AICapTrade",
+  "description": "Institutional quantitative AI crypto trading terminal with real-time analytics and automated trading bots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

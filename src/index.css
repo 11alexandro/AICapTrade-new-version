@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  /* Premium Glassmorphism */
+  .glass-panel {
+    background: rgba(10, 18, 36, 0.45);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-panel-heavy {
+    background: rgba(7, 13, 26, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .glass-card {
+    background: rgba(13, 23, 44, 0.4);
+    border: 1.5px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Custom Glows */
+  .scrollbar-none {
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.15), 0 0 10px -2px rgba(59, 130, 246, 0.1);
+  }
+
+  .glow-blue-strong {
+    box-shadow: 0 0 35px -5px rgba(37, 99, 235, 0.3), 0 0 15px -2px rgba(37, 99, 235, 0.2);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.15), 0 0 10px -2px rgba(6, 182, 212, 0.1);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 25px -5px rgba(239, 68, 68, 0.15), 0 0 10px -2px rgba(239, 68, 68, 0.1);
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 25px -5px rgba(236, 72, 153, 0.15), 0 0 10px -2px rgba(236, 72, 153, 0.1);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 30px -5px rgba(249, 115, 22, 0.3), 0 0 15px -2px rgba(249, 115, 22, 0.2);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.25), 0 0 10px -2px rgba(34, 197, 94, 0.15);
+  }
+
+  /* Custom Scrollbar for Trading Terminal */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(10, 18, 36, 0.2);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Base Terminal Overrides */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #030712;
+  color: #f3f4f6;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.pulsing-ring {
+  animation: pulse-ring 2.5s infinite ease-in-out;
+}
+
+/* Light mode overrides */
+.light-mode-active {
+  background-color: #f8fafc;
+}
+
+.light-mode-active body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Light mode backgrounds */
+.light-mode-active .bg-slate-950,
+.light-mode-active .bg-slate-900,
+.light-mode-active .bg-slate-900\/40,
+.light-mode-active .bg-slate-950\/30,
+.light-mode-active .bg-slate-950\/40,
+.light-mode-active .bg-slate-950\/60,
+.light-mode-active .bg-slate-950\/20 {
+  background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+/* Light mode panels */
+.light-mode-active .glass-panel {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-mode-active .glass-card {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-mode-active .glass-panel-heavy {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Light mode border overrides */
+.light-mode-active .border-slate-800,
+.light-mode-active .border-slate-800\/60,
+.light-mode-active .border-slate-800\/80,
+.light-mode-active .border-white\/5 {
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+/* Light mode text colors */
+.light-mode-active .text-slate-100,
+.light-mode-active .text-slate-200,
+.light-mode-active .text-slate-300,
+.light-mode-active .text-slate-400,
+.light-mode-active .text-white {
+  color: #1e293b !important;
+}
+
+.light-mode-active .text-slate-500,
+.light-mode-active .text-slate-600 {
+  color: #64748b !important;
+}
+
+.light-mode-active input,
+.light-mode-active select,
+.light-mode-active textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light-mode-active input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Maintain special chart / metric indicators colors */
+.light-mode-active .text-emerald-400,
+.light-mode-active .text-emerald-450 {
+  color: #10b981 !important;
+}
+
+.light-mode-active .text-rose-400,
+.light-mode-active .text-rose-455,
+.light-mode-active .text-rose-505 {
+  color: #ef4444 !important;
+}
+
+.light-mode-active .text-blue-400 {
+  color: #2563eb !important;
+}
+
+.light-mode-active .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+.light-mode-active .divide-white\/5 > * {
+  border-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+
