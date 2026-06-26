@@ -11,7 +11,7 @@ A high-performance, real-time cryptocurrency and equity market trading terminal 
 
 ## Why I Built This
 
-I designed and built **AICapTrade** as a portfolio centerpiece to showcase my capability in building full-stack, data-intensive fintech dashboards. I wanted to demonstrate how to manage high-frequency data streams, implement algorithmic pattern scanning on live memory buffers, and enforce programmatic risk management parameters. This terminal simulates institutional-grade workflows—such as real-time pricing, technical signal generation, and localized order execution—all within an entirely paper-trading context. 
+I designed and built **AICapTrade** as a portfolio centerpiece to showcase my capability in building full-stack, data-intensive fintech dashboards. I wanted to demonstrate how to manage high-frequency data streams, implement algorithmic pattern scanning on live memory buffers, and enforce programmatic risk management parameters. This terminal simulates institutional-grade workflows such as real-time pricing, technical signal generation, and localized order execution all within an entirely paper-trading context. 
 
 As a developer who closely follows both finance and software engineering, I wanted this project to reflect how real-world trading desks handle telemetry, state synchronization, and execution logic, while using modern React and Node.js patterns to keep the interface highly responsive.
 
@@ -76,7 +76,7 @@ An in-memory scanner monitors assets and generates live trade suggestions based 
 * **Signal Telemetry:** Every generated signal contains a confidence score, target exit, stop-loss protection, RSI, EMA9, and VWAP status.
 
 ### 4. Paper Trading Simulator & Risk Console
-* **Automated Momentum Entry:** Simulates a mechanical buy trigger when any tracked asset falls $2\%$ or more within a $10$-minute sliding window (a classic discretionary trading setup looking to capture mean-reversion or oversold bounces).
+* **Automated Momentum Entry:** Simulates a mechanical buy trigger when any tracked asset falls $2%\%$ or more within a $10$-minute sliding window (a classic discretionary trading setup looking to capture mean-reversion or oversold bounces).
 * **Dynamic Risk Console:** Allows real-time adjustments for:
   * **Stop Loss (SL %):** Instantly liquidates positions if price drops below target.
   * **Take Profit (TP %):** Closes trades upon reaching profit targets.
