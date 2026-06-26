@@ -1,188 +1,98 @@
 # AICapTrade
+A full-stack real-time crypto and stock trading terminal built for paper trading simulation — featuring live price streaming, algorithmic signal detection, and institutional-style risk management.
 
-A high-performance, real-time cryptocurrency and equity market trading terminal built as an interactive paper trading simulator.
-
-![AICapTrade UI](https://images.unsplash.com/photo-1642790106117-e829e14a795f?auto=format&fit=crop&q=80&w=1200) *(Screenshot coming soon)*
-
-### Live Demo
-[Explore AICapTrade Live](https://ais-pre-c5jxkhq2egiumvbak6qp5j-534704829767.us-west2.run.app)
-
----
+## Live Demo
+🔗 [View Live Project](https://aicaptrade.vercel.app/index.html)
+No sign-in required.
 
 ## Why I Built This
+I built this project to demonstrate that I understand both the financial concepts and the complex technical architecture required to build real-time trading tools. While most portfolio projects showcase basic CRUD operations with static databases, I wanted to build something that reflects real trading workflows like live streaming order books, low-latency market analysis, and real-time state synchronization. Creating a paper trading simulator allows me to demonstrate this entire full-stack system end-to-end without requiring real capital or brokerage exchange integrations.
 
-I designed and built **AICapTrade** as a portfolio centerpiece to showcase my capability in building full-stack, data-intensive fintech dashboards. I wanted to demonstrate how to manage high-frequency data streams, implement algorithmic pattern scanning on live memory buffers, and enforce programmatic risk management parameters. This terminal simulates institutional-grade workflows such as real-time pricing, technical signal generation, and localized order execution all within an entirely paper-trading context. 
+## Features
 
-As a developer who closely follows both finance and software engineering, I wanted this project to reflect how real-world trading desks handle telemetry, state synchronization, and execution logic, while using modern React and Node.js patterns to keep the interface highly responsive.
+AICapTrade implements high-fidelity real-time simulation, algorithmic monitoring, and deep performance metrics in a fully interactive, production-grade terminal dashboard.
 
----
+**Live Crypto Price Streaming**
+Connects to the Binance public WebSocket (wss://stream.binance.com:9443) for real-time BTC/USDT, ETH/USDT, SOL/USDT and XRP/USDT price feeds. Prices are seeded from the Binance REST API on startup to establish accurate day-open baselines before the WebSocket connects — eliminating the race condition where stale percentage-change values appear on first tick. A volume decay formula prevents accumulation artifacts from the high-frequency trade stream.
 
-## System Architecture
+**Stocks & Indexes Desk**
+Tracks AAPL, NVDA, TSLA, MSFT, the S&P 500 and NASDAQ 100 with real-time drift simulation keeping prices visibly moving between polling intervals. A clearly visible "SIMULATED DATA · PAPER TRADING ONLY" badge in the header makes the data sourcing transparent.
 
-AICapTrade uses a dual WebSocket architecture to handle high-frequency streams with minimal overhead. The diagram below illustrates how data flows from external public APIs down to the React frontend:
+**Algorithmic Strategy Scanner**
+Detects four real technical patterns in real time: VWAP Reversal, ABCD Pattern, Bull Flag, and Bear Flag. Each signal includes a confidence score, entry price, stop price, target price, RSI reading, EMA9 value, and VWAP status — the same fields a discretionary trader would check before entering a position.
 
-```text
-                  +-----------------------------------+
-                  |   Binance WebSocket Public API    |
-                  |   (wss://stream.binance.com:9443) |
-                  +-----------------------------------+
-                                    |
-                                    | Real-time Trade streams (<100ms)
-                                    v
-                  +-----------------------------------+
-                  |       Node.js Custom Server       |
-                  |     - Pre-fetches daily open      |
-                  |     - Consolidates pricing data   |
-                  +-----------------------------------+
-                                    |
-                                    | Socket.IO Tunneling
-                                    v
-                  +-----------------------------------+
-                  |      React Frontend State         |
-                  |     - TerminalStateContext        |
-                  |     - Local sliding buffers       |
-                  +-----------------------------------+
-                     /              |               \
-                    /               |                \
-    +-------------------+  +-----------------+  +--------------------+
-    | Strategy Scanner  |  |  Risk Console   |  | Portfolio Tracker  |
-    | (VWAP, ABCD, etc) |  |  (SL/TP Engine) |  | (Class analytics)  |
-    +-------------------+  +-----------------+  +--------------------+
-```
+**Paper Trading Simulator & Risk Console**
+Automatically simulates BUY orders when a monitored asset drops 2% or more within a 10-minute sliding window — a classic momentum entry trigger used in short-term discretionary trading. Stop Loss %, Take Profit %, position size (USDT), and maximum concurrent open positions are all configurable from the risk console. The trade history ledger shows WIN/LOSS status and PnL per trade, and the account balance is driven exclusively by the actual trade ledger.
 
-1. **Pre-fetching & Seeding:** On server startup, the Node.js backend pre-fetches the current prices and today's open levels from the Binance REST API. This seeds an accurate day-open baseline before the WebSocket connects, completely eliminating the common race condition where incorrect percentage changes appear on the first few ticks.
-2. **WebSocket Client (`ws`):** Once seeded, the backend opens a connection to Binance’s public stream for high-frequency pricing (`BTC/USDT`, `ETH/USDT`, `SOL/USDT`, and `XRP/USDT`).
-3. **Data Throttling & Volume Decay:** To prevent DOM thrashing and high CPU accumulation in the browser, the server implements a volume decay formula that throttles incoming raw trade streams and aggregates them into consistent state ticks.
-4. **Socket.IO Tunneling:** The processed tickers are tunneled immediately to the React frontend over a dedicated, persistent Socket.IO channel.
+**Portfolio Analytics**
+Breaks down performance by asset class (Crypto, Equity, Indexes) and by strategy, showing win rate, profit factor, and realized PnL per strategy. Identifies the leading strategy based on actual closed trade data.
 
----
+**Watchlist & Notifications**
+Custom watchlist with price alerts and a notification system with mark-all-read and clear-all actions.
 
-## Core Features
+**Responsive Design**
+Full responsive layout for desktop, tablet and mobile. On mobile, the sidebar collapses into a touch-friendly drawer triggered by a hamburger menu. All panels use Tailwind responsive prefixes (sm:, md:, lg:) and horizontal scrollers use touch-pan-x for smooth mobile navigation.
 
-### 1. Live Crypto Price Streaming
-* **Real-time Feeds:** Streams high-fidelity prices directly from Binance for core crypto assets.
-* **Aggregated Buffers:** The frontend processes incoming socket messages into historical candle aggregates (`1m`, `5m`, `15m`, `1H`, `4H`, `1D` intervals) to render low-latency interactive charts.
+**Market Regime Simulation**
+Simulates realistic market conditions by cycling through volatility regimes (trending, mean-reverting, high-volatility). ETH price is correlated to BTC with a 1.15 beta coefficient — reflecting the real-world relationship between the two assets.
 
-### 2. Stocks & Indexes Desk
-* **Asset Coverage:** Tracks major equities (`AAPL`, `NVDA`, `TSLA`, `MSFT`) and market indexes (`S&P 500`, `NASDAQ 100`).
-* **Micro-Drift Simulation:** Features a real-time drift simulator that mimics realistic fractional price fluctuations between server polling intervals, providing a fluid trading environment.
-* **Transparency:** Displays clear "Simulated Data" badges and delayed quotes indicators to remain honest about data origins.
+## Architecture
 
-### 3. Algorithmic Strategy Scanner
-An in-memory scanner monitors assets and generates live trade suggestions based on four distinct mechanical trading patterns:
-* **VWAP Reversal:** Scans for price exhaustion and mean-reversion signals relative to the Volume Weighted Average Price.
-* **ABCD Pattern:** Measures geometric harmonic extensions (AB = CD) to pinpoint high-probability pivot zones.
-* **Bull Flag / Bear Flag:** Tracks fast expansion poles followed by narrow consolidating channels to catch continuation breakouts.
-* **Signal Telemetry:** Every generated signal contains a confidence score, target exit, stop-loss protection, RSI, EMA9, and VWAP status.
+Data Flow:
 
-### 4. Paper Trading Simulator & Risk Console
-* **Automated Momentum Entry:** Simulates a mechanical buy trigger when any tracked asset falls $2%\%$ or more within a $10$-minute sliding window (a classic discretionary trading setup looking to capture mean-reversion or oversold bounces).
-* **Dynamic Risk Console:** Allows real-time adjustments for:
-  * **Stop Loss (SL %):** Instantly liquidates positions if price drops below target.
-  * **Take Profit (TP %):** Closes trades upon reaching profit targets.
-  * **Position Sizing:** Custom allocation of simulated USDT per trade.
-  * **Max Concurrent Positions:** Enforces strict capital risk ceilings.
-* **True Ledger Tracking:** Account balances and PnL metrics are strictly derived from the localized simulated trade ledger—ensuring no phantom accumulators or disconnected state values.
+Binance WebSocket (wss://)
+        │
+        ▼
+  Node.js Backend
+  (Socket.IO Server)
+        │
+        ▼
+  React Frontend
+  (TerminalStateContext)
+        │
+   ┌────┴────┐
+   ▼         ▼
+TradingChart  SidebarAnalytics
+MetricsGrid   BottomAnalytics
 
-### 5. Advanced Portfolio Analytics
-* **Asset Allocation:** Visualizes capital breakdown across Crypto, Stocks, and Indexes.
-* **Performance Breakdown:** Computes win rates, profit factors, and total realized PnL per strategy.
-* **Leaderboard Engine:** Automatically calculates and displays which strategy (e.g., Bull Flag vs. VWAP Reversal) is driving the highest returns based on actual historical outcomes.
-
-### 6. Interactive Command Palette
-* **Global Access:** Triggered via `Ctrl+K` or `/`.
-* **Utility Search:** Search for tickers, toggle UI modules, jump to different assets, or trigger diagnostic reboots with a keyboard-driven interface.
-
----
+The frontend subscribes to Socket.IO which proxies the Binance stream, and TerminalStateContext is the single source of truth for all price state, positions, and trade history.
 
 ## Tech Stack
 
-| Layer | Technologies | Key Use Case |
+| Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend Core** | React 18, TypeScript, Vite | Ultra-fast build times, strict component interface types |
-| **Styling & UI** | Tailwind CSS, Lucide Icons | Responsive layout grids, high-contrast dark theme |
-| **State & Motion** | React Context, Motion | Centralized financial state, smooth micro-interactions |
-| **Real-time Socket**| Socket.IO Client | Multi-channel, persistent server-sent events |
-| **Backend Service**| Node.js, Express | Aggregating market tickers, REST pre-fetching |
-| **Socket Server**  | Socket.IO, `ws` | Managing upstream Binance WS, downstream client sockets |
+| Frontend | React 18 + TypeScript | Component architecture and type safety |
+| Styling | Tailwind CSS | Utility-first responsive design |
+| Animations | Framer Motion | Micro-animations and transitions |
+| Icons | Lucide React | SVG icon library |
+| Build Tool | Vite | Fast HMR and optimized production builds |
+| Backend | Node.js + Socket.IO | WebSocket proxy server |
+| Data | Binance Public WebSocket API | Real-time crypto price stream |
+| Deployment | Vercel | Production hosting |
 
----
+## Trading Logic Explained
 
-## Trading Logic & Financial Engineering Explained
+I designed the core entry trigger around a momentum-reversal concept, where the bot monitors for a 2% price drop within any 10-minute rolling window. This is a classic momentum entry technique; when a liquid asset drops sharply in a short window, it often signals temporary institutional selling pressure or a news catalyst, which can quickly lead to a mean-reversion bounce or a strong breakout trade. I chose 2%/10min as the threshold because it filters out normal intraday noise while reliably catching genuine momentum moves.
 
-To make the simulation as realistic as possible, I implemented core trading mechanics that mimic real discretionary and systematic workflows:
+To manage risk, I built parameters into the risk console that ensure every simulated trade uses configurable stop-loss and take-profit percentages. On real trading desks, these guardrails are not optional—they define the risk-reward ratio and capital preservation rules before a position is even opened. For example, setting a 2% stop-loss with a 4.5% take-profit provides a clear 1:2.25 risk-to-reward ratio, which is standard practice for short-term momentum strategies to remain profitable over time.
 
-### The Momentum / Drop Entry Trigger
-Instead of random trade execution, the automated paper bot listens to the aggregated ticker queue. It calculates the high-water mark of each asset over a sliding 10-minute historical array. If the current price ticks $2\%$ lower than that recent high-water mark, a long signal is fired. This simulates a common short-term momentum-reversal strategy:
-$$\text{Price Drop \%} = \frac{\text{Asset High}_{10m} - \text{Price}_{\text{current}}}{\text{Asset High}_{10m}} \times 100$$
-If $\text{Price Drop \%} \ge 2\%$, the risk console verifies that current open positions are below the `Max Concurrent Positions` limit, evaluates the `USDT Position Size`, and commits a market BUY order to the ledger.
+For pattern detection, I implemented a strategy scanner that evaluates historical price state buffers in memory. The scanner looks for VWAP Reversals, which occur when the price crosses back above or below the Volume Weighted Average Price—a key intraday benchmark used by institutions—paired with RSI extremes. It also detects ABCD harmonic patterns to identify geometric support and resistance pivots, alongside Bull and Bear Flag continuation patterns that signal when consolidations are about to break out in the direction of the trend. These are the exact technical indicators that any professional trader on a proprietary desk would expect to check.
 
-### Pattern Detection Buffers
-The algorithmic scanner keeps rolling arrays of historical price indicators. 
-* **VWAP (Volume Weighted Average Price):** Calculated continuously as:
-$$\text{VWAP} = \frac{\sum (\text{Price}_{\text{typical}} \times \text{Volume})}{\sum \text{Volume}}$$
-When the current price deviates significantly from the VWAP line and the 14-period RSI crosses below 30 or above 70, the engine issues a mean-reversion signal.
-* **ABCD Pattern:** Validates structural legs by verifying that the price ratio of point $C$ to point $D$ mirrors the ratio of point $A$ to point $B$, providing classic harmonic support/resistance zones.
+The entire system is structured on a paper trading rationale where all trades are executed using simulated capital. This mirrors the industry-standard practice of backtesting or paper testing automated strategies to validate core logic, ledger persistence, and risk rule execution before committing real funds. I initialized the default account balance at $25,000 to represent a realistic, standard starting allocation for a professional prop-trading evaluation.
 
-### Risk Management Guardrails
-A trade ledger without risk management is a liability. Every simulated trade has active, locked-in triggers. The moment a tick comes across the socket, the frontend iterates through open positions, matching current market values against the position's break-even entry price. If:
-$$\text{Current PnL \%} \le -\text{Stop Loss \%} \quad \text{or} \quad \text{Current PnL \%} \ge \text{Take Profit \%}$$
-The system triggers an instantaneous simulated liquidation, writes the realized PnL to the balance sheet, and logs the exit reason (*"Stop Loss Hit"* or *"Take Profit Hit"*).
+## Installation
 
----
-
-## Responsive Design & UI Polish
-
-This terminal is built with a desktop-first layout for maximum terminal density, but adapts seamlessly to smaller screens:
-* **Adaptive Panels:** Utilizes custom Tailwind CSS grids with responsive prefixes (`lg:grid-cols-4`, `md:grid-cols-2`, `sm:grid-cols-1`).
-* **Drawer Navigation:** When viewed on tablet or mobile, the persistent sidebar collapses into an elegant overlay drawer triggered by a persistent hamburger button (`lg:hidden`).
-* **Touch-Optimized Tickers:** The header-ticker uses `touch-pan-x` and hidden native scrollbars, permitting smooth touch-swiping across quotes on mobile screens.
-* **Aesthetic Polish:** The interface features a sleek "Cosmic Slate" glassmorphic UI, utilizing subtle neon-amber borders (`border-amber-500/10`), thin container separators, a backdrop-blur filter for floating alerts, and a pulsing live latency status indicator to emphasize active connectivity.
-
----
-
-## Installation & Running
-
-### Prerequisites
-Make sure you have Node.js (v18+) and npm installed.
-
-### Steps
-1. **Clone the repository and enter the directory:**
-   ```bash
-   git clone https://github.com/yourusername/aicaptrade.git
-   cd aicaptrade
-   ```
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-   *The terminal binds to port `3000` and supports immediate hot-reloading.*
-4. **Build the application:**
-   ```bash
-   npm run build
-   ```
-5. **Run in production mode:**
-   ```bash
-   npm run start
-   ```
-
-Open your browser and navigate to: **`http://localhost:3000`**
-
----
+```bash
+git clone https://github.com/11alexandro/aicaptrade.git
+cd aicaptrade
+npm install
+npm run dev
+```
+Open http://localhost:3000
 
 ## Project Status
-
-This is a **portfolio demonstration project** meant to illustrate advanced front-end capabilities, full-stack stream integration, and interactive dashboard design. No real currency is ever traded, and all accounts use mock paper balances. 
-
----
+This is a portfolio project built to demonstrate full-stack fintech development skills. All trades are paper trades — no real funds are used or at risk. Price data for stocks and indexes is simulated; crypto prices stream live from the Binance public API.
 
 ## Author
-
-**Alex Valmyr**  
-Frontend & Full-Stack Developer focused on high-performance fintech dashboards, trading platform interfaces, and Web3 applications.  
-* [Portfolio Website](https://yourportfolio.com) (Placeholder)
-* [LinkedIn](https://linkedin.com/in/yourprofile) (Placeholder)
+**Alex Valmyr** — Full-Stack Developer focused on fintech, trading platforms, and Web3 applications.
+GitHub: [11alexandro](https://github.com/11alexandro)
