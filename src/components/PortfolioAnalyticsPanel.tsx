@@ -70,28 +70,28 @@ export function PortfolioAnalyticsPanel() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-4.5 border-b border-white/5">
         <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850">
           <span className="text-[8.5px] text-slate-500 uppercase tracking-wider font-mono block">Simulated PnL</span>
-          <span className={`text-base font-black font-mono block mt-1.5 ${overall.simulatedPnL >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+          <span className={`text-xs sm:text-sm md:text-base font-black font-mono block mt-1.5 truncate ${overall.simulatedPnL >= 0 ? "text-emerald-500" : "text-red-500"}`}>
             ${overall.simulatedPnL >= 0 ? "+" : ""}{overall.simulatedPnL.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
 
         <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850">
           <span className="text-[8.5px] text-slate-500 uppercase tracking-wider font-mono block">Win Rate</span>
-          <span className="text-base font-black font-mono text-white block mt-1.5">
+          <span className="text-xs sm:text-sm md:text-base font-black font-mono text-white block mt-1.5 truncate">
             {overall.winRate.toFixed(1)}%
           </span>
         </div>
 
         <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850">
           <span className="text-[8.5px] text-slate-500 uppercase tracking-wider font-mono block">Profit Factor</span>
-          <span className="text-base font-black font-mono text-amber-400 block mt-1.5">
+          <span className="text-xs sm:text-sm md:text-base font-black font-mono text-amber-400 block mt-1.5 truncate">
             {overall.profitFactor.toFixed(2)}x
           </span>
         </div>
 
         <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850">
           <span className="text-[8.5px] text-slate-500 uppercase tracking-wider font-mono block">Completed Trades</span>
-          <span className="text-base font-black font-mono text-slate-200 block mt-1.5">
+          <span className="text-xs sm:text-sm md:text-base font-black font-mono text-slate-200 block mt-1.5 truncate">
             {overall.tradesCount} ({overall.winsCount}W / {overall.lossesCount}L)
           </span>
         </div>

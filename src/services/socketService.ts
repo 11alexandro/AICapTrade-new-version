@@ -34,6 +34,8 @@ class SocketService {
   private reconnectTimeout: any = null;
   private simulatedInterval: any = null;
   private watchdogInterval: any = null;
+  private diagTimeout: any = null;
+  private pendingDiag = false;
   
   private isSimulatedFallback = false;
   private connectionStatus: ConnectionStatus = "SIMULATED";
@@ -197,6 +199,11 @@ class SocketService {
   }
 
   private triggerDiagnostics() {
+    if (this.diagTimeout) {
+      this.pendingDiag = true;
+      return;
+    }
+
     const d = this.getDiagnostics();
     this.diagnosticsCallbacks.forEach(cb => {
       try {
@@ -205,6 +212,14 @@ class SocketService {
         // silent error handling
       }
     });
+
+    this.diagTimeout = setTimeout(() => {
+      this.diagTimeout = null;
+      if (this.pendingDiag) {
+        this.pendingDiag = false;
+        this.triggerDiagnostics();
+      }
+    }, 300);
   }
 
   public subscribe(callback: TickerCallback): () => void {

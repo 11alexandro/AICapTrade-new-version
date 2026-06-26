@@ -6,11 +6,11 @@
 import React from "react";
 import { 
   TrendingUp, Cpu, Play, ArrowUpRight, Sliders, Shield, 
-  BarChart2, History, Database, Settings, Activity 
+  BarChart2, History, Database, Settings, Activity, X
 } from "lucide-react";
 import { useTerminal } from "../store/TerminalStateContext";
 
-export default function LeftSidebar() {
+export default function LeftSidebar({ onClose }: { onClose?: () => void }) {
   const { 
     activeTab, 
     setActiveTab, 
@@ -36,24 +36,38 @@ export default function LeftSidebar() {
   ];
 
   return (
-    <aside className={`w-64 shrink-0 flex flex-col justify-between p-4 ${theme === "light" ? "bg-white border-r border-slate-200 text-slate-800" : "bg-slate-950/65 border-r border-slate-800/80 text-white"} backdrop-blur-md h-screen sticky top-0 font-sans z-30 select-none overflow-y-auto overflow-x-hidden scrollbar-none`}>
+    <aside className={`w-full h-full flex flex-col justify-between p-4 ${theme === "light" ? "bg-white border-r border-slate-200 text-slate-800" : "bg-slate-950 border-r border-slate-800/80 text-white"} font-sans select-none overflow-y-auto overflow-x-hidden scrollbar-none`}>
       <div className="flex flex-col space-y-4">
         {/* Logo and Brand Banner */}
-        <div 
-          onClick={() => setActiveTab("dashboard")} 
-          className="flex items-center space-x-2 px-2 py-1 cursor-pointer group"
-        >
-          <div className="flex items-center justify-center p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 glow-blue group-hover:scale-105 transition-transform">
-            <TrendingUp className="h-6 w-6 text-blue-400" />
+        <div className="flex items-center justify-between">
+          <div 
+            onClick={() => {
+              setActiveTab("dashboard");
+              if (onClose) onClose();
+            }} 
+            className="flex items-center space-x-2 px-2 py-1 cursor-pointer group flex-1"
+          >
+            <div className="flex items-center justify-center p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 glow-blue group-hover:scale-105 transition-transform">
+              <TrendingUp className="h-6 w-6 text-blue-400" />
+            </div>
+            <div>
+              <span className={`font-display font-black text-lg tracking-tight ${theme === "light" ? "text-slate-900" : "bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent"}`}>
+                AICapTrade
+              </span>
+              <span className="text-[9px] font-mono font-bold text-slate-500 block uppercase tracking-widest leading-none mt-0.5">
+                AI Trading Terminal
+              </span>
+            </div>
           </div>
-          <div>
-            <span className={`font-display font-black text-lg tracking-tight ${theme === "light" ? "text-slate-900" : "bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent"}`}>
-              AICapTrade
-            </span>
-            <span className="text-[9px] font-mono font-bold text-slate-500 block uppercase tracking-widest leading-none mt-0.5">
-              AI Trading Terminal
-            </span>
-          </div>
+
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors border border-white/5 lg:hidden cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Sidebar List */}
@@ -64,7 +78,10 @@ export default function LeftSidebar() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  if (onClose) onClose();
+                }}
                 className={`relative w-full px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 flex items-center space-x-3 cursor-pointer group ${
                   isActive
                     ? "text-white bg-blue-600/20 border border-blue-500/35 glow-blue shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] font-bold"

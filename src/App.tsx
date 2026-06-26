@@ -87,6 +87,7 @@ function AppContent() {
   const [exchangeApiKey, setExchangeApiKey] = useState(apiPublicKey);
   const [exchangeSecretKey, setExchangeSecretKey] = useState(apiSecretKey);
   const [connectionSuccessText, setConnectionSuccessText] = useState("");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const [historySearchTerm, setHistorySearchTerm] = useState("");
   const [historyStatusFilter, setHistoryStatusFilter] = useState("all");
@@ -153,14 +154,31 @@ function AppContent() {
       <div className="absolute top-[-5%] left-[-10%] w-[45vw] h-[45vw] bg-blue-600/5 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="absolute bottom-[10%] right-[-10%] w-[35vw] h-[35vw] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Left Navigation panels */}
-      <LeftSidebar />
+      {/* Desktop Sidebar (hidden on mobile/tablet screen sizes) */}
+      <div className="hidden lg:block w-64 shrink-0">
+        <LeftSidebar />
+      </div>
+
+      {/* Mobile Drawer Sidebar */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop overlay */}
+          <div 
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          {/* Drawer content */}
+          <div className="fixed inset-y-0 left-0 w-64 h-full shadow-2xl z-50">
+            <LeftSidebar onClose={() => setIsMobileSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Main deck viewport containers */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto relative z-10">
         
         {/* Header containing Tickers and Search Command bar */}
-        <HeaderBar />
+        <HeaderBar onMenuToggle={() => setIsMobileSidebarOpen(true)} />
 
         <main className="flex-1 pb-10">
           
@@ -175,7 +193,7 @@ function AppContent() {
                 <MetricsGrid />
 
                 {/* 2. CHANNELS PLOTTED TRADING VIEW CANVAS */}
-                <div className="px-6 py-2">
+                <div className="px-3 md:px-6 py-2">
                   <TradingChart />
                 </div>
 
@@ -183,7 +201,7 @@ function AppContent() {
                 <BottomAnalytics />
 
                 {/* 4. Active positions vault list */}
-                <div className="px-6 py-2">
+                <div className="px-3 md:px-6 py-2">
                   <div className="glass-panel rounded-2xl p-5 bg-slate-950/30 border-slate-800/80 shadow-2xl overflow-hidden mt-1">
                     <div className="flex justify-between items-center pb-2.5 border-b border-white/5 mb-3 select-none">
                       <span className="text-xs font-bold text-slate-400 font-sans">Active Exposure Positions ({activePositions.length})</span>
@@ -268,7 +286,7 @@ function AppContent() {
 
           {/* TAB 2: Market Streaming View */}
           {activeTab === "market-streams" && (
-            <div className="max-w-7xl mx-auto p-6 font-sans space-y-6">
+            <div className="max-w-7xl mx-auto p-3 md:p-6 font-sans space-y-6">
               <div className="flex justify-between items-center mb-2">
                 <div>
                   <h1 className="text-2xl font-display font-black text-white leading-none">Multi-Asset Desk Streams</h1>
@@ -289,7 +307,7 @@ function AppContent() {
 
           {/* TAB 3: Bot Control panel page */}
           {activeTab === "bot-controls" && (
-            <div className="max-w-4xl mx-auto p-6 font-sans space-y-6">
+            <div className="max-w-4xl mx-auto p-3 md:p-6 font-sans space-y-6">
               <div>
                 <h1 className="text-2xl font-display font-black text-white leading-none">Automated Bot Engine Center</h1>
                 <p className="text-[11px] text-slate-500 font-mono tracking-wider mt-1.5 uppercase">Regime Tuning, Volatility Buffers & Exposure Limits</p>
@@ -307,7 +325,7 @@ function AppContent() {
                         <span className="text-slate-400 font-medium">Algorithmic Risk Mode</span>
                         <span className="text-amber-400 font-bold font-mono">{riskLevel} Regime</span>
                       </div>
-                      <div className="grid grid-cols-4 gap-1.5 p-0.5 bg-slate-900 border border-slate-800 rounded-xl">
+                      <div className="grid grid-cols-4 gap-1 md:gap-1.5 p-0.5 bg-slate-900 border border-slate-800 rounded-xl">
                         {(["Low", "Medium", "High", "Institutional"] as const).map((r) => (
                           <button
                             key={r}
@@ -315,11 +333,12 @@ function AppContent() {
                               setRiskLevel(r);
                               addNotification("Engine Update", `Algorithmic safety profile set to ${r}.`, "info");
                             }}
-                            className={`py-2 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                            className={`py-2 px-0.5 sm:px-1 rounded-lg text-[8px] min-[375px]:text-[9px] sm:text-[10px] font-bold uppercase transition-all cursor-pointer truncate flex items-center justify-center leading-none text-center ${
                               riskLevel === r
-                                ? "bg-blue-600/20 border border-blue-500/30 text-white font-bold"
-                                : "text-slate-500 hover:text-slate-300"
+                                ? "bg-blue-600/20 border border-blue-500/30 text-white"
+                                : "text-slate-500 hover:text-slate-300 border border-transparent"
                             }`}
+                            title={r}
                           >
                             {r}
                           </button>

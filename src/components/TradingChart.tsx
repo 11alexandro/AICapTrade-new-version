@@ -554,7 +554,7 @@ export default function TradingChart() {
 
 
   return (
-    <div className={`glass-panel rounded-2xl p-5 shadow-2x1 relative overflow-hidden bg-slate-950/20 border-slate-800/80 font-sans transition-all duration-300 ${
+    <div className={`glass-panel rounded-2xl p-3 md:p-5 shadow-2x1 relative overflow-hidden bg-slate-950/20 border-slate-800/80 font-sans transition-all duration-300 ${
       isFullscreen 
         ? "fixed inset-4 z-50 bg-slate-950 border border-slate-700/80 shadow-[0_24px_60px_rgba(0,0,0,0.95)]" 
         : ""
@@ -564,24 +564,25 @@ export default function TradingChart() {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between pb-4 border-b border-white/5 gap-3">
         
         {/* Symbol Label Details Info */}
-        <div className="flex items-center space-x-3.5 select-none">
-          <div className={`w-9 h-9 rounded-full ${activeCoin.color} font-black text-lg flex items-center justify-center font-mono shadow-md`}>
+        <div className="flex items-center space-x-3.5 select-none flex-wrap gap-y-2">
+          <div className={`w-9 h-9 rounded-full ${activeCoin.color} font-black text-lg flex items-center justify-center font-mono shadow-md shrink-0`}>
             {activeCoin.icon}
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
+          <div className="min-w-0">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1.5">
               <span className="text-base font-bold text-white tracking-tight">{normalizedAsset}</span>
-              <button className="text-amber-500 hover:text-amber-400 transition-colors mr-2">
+              <button className="text-amber-500 hover:text-amber-400 transition-colors mr-1 shrink-0">
                 <Star className="h-3.5 w-3.5 fill-current" />
               </button>
               
               {/* Simulated Data Badge */}
-              <div className="px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 text-[10px] font-mono flex items-center space-x-1.5 select-none leading-none shadow-sm">
+              <div className="px-2 py-0.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 text-[9px] font-mono flex items-center space-x-1 select-none leading-none shadow-sm shrink-0">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
                 </span>
-                <span className="font-bold tracking-wider">SIMULATED DATA · PAPER TRADING ONLY</span>
+                <span className="font-bold tracking-wider hidden sm:inline">SIMULATED DATA · PAPER TRADING ONLY</span>
+                <span className="font-bold tracking-wider sm:hidden">SIMULATED DATA</span>
               </div>
             </div>
             <div className="flex items-center space-x-2.5 mt-0.5">

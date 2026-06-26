@@ -25,6 +25,8 @@ class MarketDataService {
   private stocksInterval: any = null;
   private driftInterval: any = null;
   private stockSourceStatus: "LIVE" | "SIMULATED" = "LIVE";
+  private emitTimeout: any = null;
+  private pendingEmit = false;
 
   // Active pricing matrix of the terminal
   private quotes: Record<string, AssetQuote> = {
@@ -262,6 +264,11 @@ class MarketDataService {
   }
 
   private emitUpdates() {
+    if (this.emitTimeout) {
+      this.pendingEmit = true;
+      return;
+    }
+
     this.callbacks.forEach(cb => {
       try {
         cb({ ...this.quotes });
@@ -269,6 +276,14 @@ class MarketDataService {
         // Silent catch
       }
     });
+
+    this.emitTimeout = setTimeout(() => {
+      this.emitTimeout = null;
+      if (this.pendingEmit) {
+        this.pendingEmit = false;
+        this.emitUpdates();
+      }
+    }, 150);
   }
 
   public getAllQuotes(): Record<string, AssetQuote> {

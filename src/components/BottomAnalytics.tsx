@@ -84,10 +84,10 @@ export default function BottomAnalytics() {
   const rStrokeDashoffset = rCircumference - riskPercentVal * rCircumference;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-6 py-2 pb-6 font-sans select-none">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-3 md:px-6 py-2 pb-6 font-sans select-none">
       
       {/* SECTION 1: Bot Controls Panel */}
-      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors flex flex-col justify-between h-[190px]">
+      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors flex flex-col justify-between min-h-[225px] lg:h-[225px]">
         <div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2.5">
             Bot Engine Controls
@@ -135,7 +135,7 @@ export default function BottomAnalytics() {
       </div>
 
       {/* SECTION 2: Trading Strategy Configurator */}
-      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors h-[190px] flex flex-col justify-between relative">
+      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors min-h-[225px] lg:h-[225px] flex flex-col justify-between relative">
         <div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
             Active Neural Strategy
@@ -220,7 +220,7 @@ export default function BottomAnalytics() {
       </div>
 
       {/* SECTION 3: Risk Overview Widget */}
-      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors h-[190px] flex items-center justify-between">
+      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors min-h-[225px] lg:h-[225px] flex items-center justify-between">
         <div className="flex flex-col justify-between h-full w-[45%] shrink-0">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block leading-none">
             Risk Profile
@@ -286,7 +286,7 @@ export default function BottomAnalytics() {
       </div>
 
       {/* SECTION 4: PnL Performance Chart */}
-      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors h-[190px] flex flex-col justify-between group">
+      <div className="glass-panel rounded-2xl p-4.5 bg-slate-950/40 border-slate-800/80 hover:border-slate-850 transition-colors min-h-[225px] lg:h-[225px] flex flex-col justify-between group">
         <div>
           <div className="flex justify-between items-center mb-1">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">

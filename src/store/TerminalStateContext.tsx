@@ -647,6 +647,27 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
   const hasInitializedPositions = useRef(false);
   const lastWsMsgTimestamp = useRef<number>(0);
 
+  const totalTradesRef = useRef(totalTrades);
+  const winRateRef = useRef(winRate);
+  const scanSignalsRef = useRef<ScanSignal[]>([]);
+  const pricesRef = useRef({ btcPrice, ethPrice, solPrice, xrpPrice });
+
+  useEffect(() => {
+    totalTradesRef.current = totalTrades;
+  }, [totalTrades]);
+
+  useEffect(() => {
+    winRateRef.current = winRate;
+  }, [winRate]);
+
+  useEffect(() => {
+    scanSignalsRef.current = scanSignals;
+  }, [scanSignals]);
+
+  useEffect(() => {
+    pricesRef.current = { btcPrice, ethPrice, solPrice, xrpPrice };
+  }, [btcPrice, ethPrice, solPrice, xrpPrice]);
+
   // Helper to adjust initial active positions to match actual market entry prices cleanly on first fetch
   const adjustInitialPositions = (fetchedBtcPrice: number, fetchedEthPrice: number) => {
     if (!hasInitializedPositions.current) {
@@ -700,14 +721,16 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
           const availableRegimes = REGIMES.filter((_, idx) => idx !== currentRegimeIdx);
           const randomRegime = availableRegimes[Math.floor(Math.random() * availableRegimes.length)];
           
-          setSession(randomRegime);
-          
-          // Generate realistic regime shift notification
-          addNotification(
-            "Regime Shift Detected",
-            `AI Core triggered automatic transition to ${randomRegime.label}: ${randomRegime.description}. Volatility scaled to ${randomRegime.volatility}x.`,
-            "warning"
-          );
+          setTimeout(() => {
+            setSession(randomRegime);
+            
+            // Generate realistic regime shift notification
+            addNotification(
+              "Regime Shift Detected",
+              `AI Core triggered automatic transition to ${randomRegime.label}: ${randomRegime.description}. Volatility scaled to ${randomRegime.volatility}x.`,
+              "warning"
+            );
+          }, 0);
           
           // Reset ticks remaining between 12 and 22 cycles
           return Math.floor(Math.random() * 11) + 12;
@@ -869,20 +892,19 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
               strategyUsed: strategy
             };
 
-            setTradeHistory((hist) => [newHist, ...hist]);
-            setTotalTrades((t) => {
-              const nextTrades = t + 1;
-              setWinRate((rate) => {
-                const currentWins = Math.round(t * (rate / 100));
-                const nextWins = target.pnl > 0 ? currentWins + 1 : currentWins;
-                return parseFloat(((nextWins / nextTrades) * 100).toFixed(2));
-              });
-              return nextTrades;
-            });
-            setRealizedPnLOffset((offset) => offset + target.pnl);
+            const currentTotalTrades = totalTradesRef.current;
+            const currentWinRate = winRateRef.current;
+            const nextTrades = currentTotalTrades + 1;
+            const currentWins = Math.round(currentTotalTrades * (currentWinRate / 100));
+            const nextWins = target.pnl > 0 ? currentWins + 1 : currentWins;
+            const nextRate = parseFloat(((nextWins / nextTrades) * 100).toFixed(2));
 
-            // Append to simulatedTrades as closed trade
             setTimeout(() => {
+              setTradeHistory((hist) => [newHist, ...hist]);
+              setTotalTrades(nextTrades);
+              setWinRate(nextRate);
+              setRealizedPnLOffset((offset) => offset + target.pnl);
+
               const newSimulatedClosedTrade: SimulatedTrade = {
                 id: `tr-bot-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
                 symbol: target.symbol.replace("USDT", "/USDT"),
@@ -899,16 +921,16 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
                 riskAmount: 0
               };
               const currentTrades = tradeSimulatorService.loadTrades();
-              const nextTrades = [newSimulatedClosedTrade, ...currentTrades];
-              tradeSimulatorService.saveTrades(nextTrades);
-              setSimulatedTrades(nextTrades);
-            }, 0);
+              const nextTradesList = [newSimulatedClosedTrade, ...currentTrades];
+              tradeSimulatorService.saveTrades(nextTradesList);
+              setSimulatedTrades(nextTradesList);
 
-            addNotification(
-              isTp ? "Bot Take-Profit Executed" : "Bot Stop-Loss Saved Position",
-              `Closed ${target.symbol} ${target.type} at $${target.markPrice}. Realized: $${target.pnl.toFixed(2)} (${target.pnlPercent > 0 ? "+" : ""}${target.pnlPercent.toFixed(2)}%) via strategy [${strategy}].`,
-              isTp ? "success" : "warning"
-            );
+              addNotification(
+                isTp ? "Bot Take-Profit Executed" : "Bot Stop-Loss Saved Position",
+                `Closed ${target.symbol} ${target.type} at $${target.markPrice}. Realized: $${target.pnl.toFixed(2)} (${target.pnlPercent > 0 ? "+" : ""}${target.pnlPercent.toFixed(2)}%) via strategy [${strategy}].`,
+                isTp ? "success" : "warning"
+              );
+            }, 0);
           });
 
           const closingIds = new Set(positionsToClose.map((p) => p.id));
@@ -941,20 +963,19 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
               strategyUsed: strategy
             };
 
-            setTradeHistory((hist) => [newHist, ...hist]);
-            setTotalTrades((t) => {
-              const nextTrades = t + 1;
-              setWinRate((rate) => {
-                const currentWins = Math.round(t * (rate / 100));
-                const nextWins = target.pnl > 0 ? currentWins + 1 : currentWins;
-                return parseFloat(((nextWins / nextTrades) * 100).toFixed(2));
-              });
-              return nextTrades;
-            });
-            setRealizedPnLOffset((offset) => offset + target.pnl);
+            const currentTotalTrades = totalTradesRef.current;
+            const currentWinRate = winRateRef.current;
+            const nextTrades = currentTotalTrades + 1;
+            const currentWins = Math.round(currentTotalTrades * (currentWinRate / 100));
+            const nextWins = target.pnl > 0 ? currentWins + 1 : currentWins;
+            const nextRate = parseFloat(((nextWins / nextTrades) * 100).toFixed(2));
 
-            // Append to simulatedTrades as closed trade
             setTimeout(() => {
+              setTradeHistory((hist) => [newHist, ...hist]);
+              setTotalTrades(nextTrades);
+              setWinRate(nextRate);
+              setRealizedPnLOffset((offset) => offset + target.pnl);
+
               const newSimulatedClosedTrade: SimulatedTrade = {
                 id: `tr-bot-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
                 symbol: target.symbol.replace("USDT", "/USDT"),
@@ -971,16 +992,16 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
                 riskAmount: 0
               };
               const currentTrades = tradeSimulatorService.loadTrades();
-              const nextTrades = [newSimulatedClosedTrade, ...currentTrades];
-              tradeSimulatorService.saveTrades(nextTrades);
-              setSimulatedTrades(nextTrades);
-            }, 0);
+              const nextTradesList = [newSimulatedClosedTrade, ...currentTrades];
+              tradeSimulatorService.saveTrades(nextTradesList);
+              setSimulatedTrades(nextTradesList);
 
-            addNotification(
-              "Bot Strategy Settle",
-              `Closed ${target.symbol} ${target.type} at $${target.markPrice} as strategy turn completed. Realized: $${target.pnl.toFixed(2)} (${target.pnlPercent > 0 ? "+" : ""}${target.pnlPercent.toFixed(2)}%).`,
-              "info"
-            );
+              addNotification(
+                "Bot Strategy Settle",
+                `Closed ${target.symbol} ${target.type} at $${target.markPrice} as strategy turn completed. Realized: $${target.pnl.toFixed(2)} (${target.pnlPercent > 0 ? "+" : ""}${target.pnlPercent.toFixed(2)}%).`,
+                "info"
+              );
+            }, 0);
 
             return prevPositions.filter((_, idx) => idx !== oldestIndex);
           }
@@ -990,10 +1011,10 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
         // 35% chance to fill a new simulated strategy order on an asset
         if (Math.random() < 0.35) {
           const symbolOptions = [
-            { sym: "BTCUSDT", price: btcPrice, sizeBase: 0.15, levBase: 10 },
-            { sym: "ETHUSDT", price: ethPrice, sizeBase: 1.25, levBase: 25 },
-            { sym: "SOLUSDT", price: solPrice, sizeBase: 15, levBase: 15 },
-            { sym: "XRPUSDT", price: xrpPrice, sizeBase: 400, levBase: 20 },
+            { sym: "BTCUSDT", price: pricesRef.current.btcPrice, sizeBase: 0.15, levBase: 10 },
+            { sym: "ETHUSDT", price: pricesRef.current.ethPrice, sizeBase: 1.25, levBase: 25 },
+            { sym: "SOLUSDT", price: pricesRef.current.solPrice, sizeBase: 15, levBase: 15 },
+            { sym: "XRPUSDT", price: pricesRef.current.xrpPrice, sizeBase: 400, levBase: 20 },
           ];
 
           const choice = symbolOptions[Math.floor(Math.random() * symbolOptions.length)];
@@ -1032,11 +1053,13 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
             timestamp: Date.now()
           };
 
-          addNotification(
-            "Bot Entry Order Filled",
-            `Filled ${strategy} ${type} on ${choice.sym} x${levIdx} leverage. Entry Price: $${choice.price}.`,
-            "success"
-          );
+          setTimeout(() => {
+            addNotification(
+              "Bot Entry Order Filled",
+              `Filled ${strategy} ${type} on ${choice.sym} x${levIdx} leverage. Entry Price: $${choice.price}.`,
+              "success"
+            );
+          }, 0);
 
           return [newPos, ...prevPositions];
         }
@@ -1054,11 +1077,7 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
     stopLoss,
     takeProfit,
     capitalAllocation,
-    maxPositionSize,
-    btcPrice,
-    ethPrice,
-    solPrice,
-    xrpPrice
+    maxPositionSize
   ]);
 
   // 4. High-Frequency Trading (HFT) Microsecond Scalper Simulation
@@ -1143,6 +1162,11 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
     }, 1200);
   };
 
+  const rebootSystemRef = useRef(rebootSystem);
+  useEffect(() => {
+    rebootSystemRef.current = rebootSystem;
+  });
+
   // 5. Daily Session Countdown / Automated Epoch Reboot
   useEffect(() => {
     if (!botRunning) return;
@@ -1152,7 +1176,7 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
         if (prev <= 1) {
           // Automatic rollover completed!
           setTimeout(() => {
-            rebootSystem();
+            rebootSystemRef.current();
           }, 0);
           return 180; // Reset
         }
@@ -1161,7 +1185,7 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [botRunning, totalBalance, totalProfit, winRate, allocatedCapitalPercent]);
+  }, [botRunning]);
 
   // Multi-Asset Trading Terminal Core Integrators
   const setRiskSettings = (settings: RiskSettings) => {
@@ -1284,6 +1308,11 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
     return () => unsubscribe();
   }, [riskSettings]);
 
+  const executeSimulatedTradeRef = useRef(executeSimulatedTrade);
+  useEffect(() => {
+    executeSimulatedTradeRef.current = executeSimulatedTrade;
+  });
+
   // Periodic Strategy Scanner Engine Hook
   useEffect(() => {
     if (!botRunning) return;
@@ -1292,27 +1321,30 @@ export function TerminalStateProvider({ children }: { children: React.ReactNode 
       watchlist.forEach(symbol => {
         const signal = strategyScannerService.scanAsset(symbol);
         if (signal) {
-          setScanSignals(prev => {
-            const hasDuplicate = prev.some(s => s.symbol === signal.symbol && s.patternName === signal.patternName && (Date.now() - new Date(s.timestamp).getTime() < 30000));
-            if (hasDuplicate) return prev;
+          const prevSignals = scanSignalsRef.current;
+          const hasDuplicate = prevSignals.some(
+            s => s.symbol === signal.symbol && 
+            s.patternName === signal.patternName && 
+            (Date.now() - new Date(s.timestamp).getTime() < 30000)
+          );
+          if (hasDuplicate) return;
 
-            addNotification(
-              "Strategy Triggered",
-              `Scanner detected ${signal.patternName} (${signal.direction}) on ${signal.symbol} holding ${signal.confidenceScore}% confidence.`,
-              signal.direction === "BUY" ? "success" : "warning"
-            );
+          addNotification(
+            "Strategy Triggered",
+            `Scanner detected ${signal.patternName} (${signal.direction}) on ${signal.symbol} holding ${signal.confidenceScore}% confidence.`,
+            signal.direction === "BUY" ? "success" : "warning"
+          );
 
-            setTotalSignalsCount(c => c + 1);
-            executeSimulatedTrade(signal);
+          setTotalSignalsCount(c => c + 1);
+          executeSimulatedTradeRef.current(signal);
 
-            return [signal, ...prev].slice(0, 30);
-          });
+          setScanSignals(prev => [signal, ...prev].slice(0, 30));
         }
       });
     }, 5000);
 
     return () => clearInterval(scanInterval);
-  }, [botRunning, watchlist, riskSettings, totalBalance]);
+  }, [botRunning, watchlist]);
 
   return (
     <TerminalContext.Provider

@@ -20,7 +20,7 @@ export default function MetricsGrid() {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6 py-2 font-sans select-none">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 md:px-6 py-2 font-sans select-none">
       
       {/* CARD 1: Total Balance */}
       <div className="glass-panel hover:border-blue-500/30 rounded-2xl p-5 relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px] flex flex-col justify-between h-[125px] group">

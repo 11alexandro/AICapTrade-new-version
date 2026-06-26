@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Cpu, StopCircle, PlayCircle, Layers, TrendingUp, AlertCircle } from "lucide-react";
 import { useTerminal } from "../store/TerminalStateContext";
 
@@ -66,45 +66,53 @@ export default function SidebarAnalytics() {
     };
   }, [botRunning]);
 
+  // Keep contextual data updated for interval use without re-triggering effect
+  const contextRef = useRef({ btcPrice, ethPrice, solPrice, xrpPrice, session });
+  useEffect(() => {
+    contextRef.current = { btcPrice, ethPrice, solPrice, xrpPrice, session };
+  });
+
   // Feed simulation tickers streaming
   useEffect(() => {
     const streamInterval = setInterval(() => {
+      const { btcPrice: currentBtc, ethPrice: currentEth, solPrice: currentSol, xrpPrice: currentXrp, session: currentSession } = contextRef.current;
+      
       // 35% chance to push a smart contextual system event alert
       const shouldPushAlert = Math.random() < 0.35;
       
       if (shouldPushAlert) {
         const alerts: { msg: string; severity: "info" | "warning" | "success" | "danger" }[] = [];
         
-        if (session.current === "BULLISH_TREND") {
+        if (currentSession.current === "BULLISH_TREND") {
           alerts.push(
             { msg: "AI Trigger: Long scalps scaling on bullish grid step", severity: "success" },
             { msg: "Vol Alert: Heavy spot volume absorption active", severity: "info" },
             { msg: "Strategy: Trend continuation bias verified [92.1%]", severity: "success" }
           );
-        } else if (session.current === "BEARISH_TREND") {
+        } else if (currentSession.current === "BEARISH_TREND") {
           alerts.push(
             { msg: "Risk Warning: Cascade leverage flushout of long bids", severity: "danger" },
             { msg: "Strategy: Capital hedge protective short re-hedging loaded", severity: "warning" },
             { msg: "HFT Trigger: Short block scalp target achieved", severity: "success" }
           );
-        } else if (session.current === "BREAKOUT_EXPANSION") {
+        } else if (currentSession.current === "BREAKOUT_EXPANSION") {
           alerts.push(
             { msg: "Breakout Detected: Upward momentum breaks 1H resistance", severity: "success" },
             { msg: "Alert: Volatility expansion triggered [EMA 20 crossover]", severity: "warning" },
             { msg: "Take-Profit: Tightened trailing stop-loss buffers", severity: "info" }
           );
-        } else if (session.current === "HIGH_VOLATILITY") {
+        } else if (currentSession.current === "HIGH_VOLATILITY") {
           alerts.push(
             { msg: "Risk Critical: Extreme variance spike, slippage risk elevated", severity: "danger" },
             { msg: "Strategy: HFT auto-scalper adjusting parameters actively", severity: "warning" },
             { msg: "Solver Core: SOL delta exposure hedge adjusted", severity: "info" }
           );
-        } else if (session.current === "LOW_VOLATILITY") {
+        } else if (currentSession.current === "LOW_VOLATILITY") {
           alerts.push(
             { msg: "Market Sync: Sideways range tightening, compression mode active", severity: "info" },
             { msg: "Strategy: Mean Reversion bounds compressed for scalp trades", severity: "success" }
           );
-        } else if (session.current === "REVERSAL") {
+        } else if (currentSession.current === "REVERSAL") {
           alerts.push(
             { msg: "Reversal Detected: Bullish exhaustion triggered on high limits", severity: "warning" },
             { msg: "Strategy: Pivot-point scaling active [Node B]", severity: "info" }
@@ -137,16 +145,16 @@ export default function SidebarAnalytics() {
       const randomAsset = assets[Math.floor(Math.random() * assets.length)];
       const randomType = types[Math.floor(Math.random() * types.length)];
 
-      let activeAssetPrice = btcPrice;
+      let activeAssetPrice = currentBtc;
       let sizeFactor = 0.25;
       if (randomAsset === "ETH") {
-        activeAssetPrice = ethPrice;
+        activeAssetPrice = currentEth;
         sizeFactor = 1.45;
       } else if (randomAsset === "SOL") {
-        activeAssetPrice = solPrice;
+        activeAssetPrice = currentSol;
         sizeFactor = 12.8;
       } else if (randomAsset === "XRP") {
-        activeAssetPrice = xrpPrice;
+        activeAssetPrice = currentXrp;
         sizeFactor = 1205.0;
       }
 
@@ -167,7 +175,7 @@ export default function SidebarAnalytics() {
     }, 4500);
 
     return () => clearInterval(streamInterval);
-  }, [btcPrice, ethPrice, solPrice, xrpPrice, session]);
+  }, []);
 
   const formatUptimeStr = (totalSecs: number) => {
     const h = Math.floor(totalSecs / 3600);
@@ -299,7 +307,7 @@ export default function SidebarAnalytics() {
             </span>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 max-h-[235px] overflow-y-auto pr-1 scrollbar-none">
             {feedTrades.map((t) => {
               if (t.type === "ALERT" || t.type === "TRIGGER") {
                 const borderS = t.severity === "danger" ? "border-rose-500/20 bg-rose-500/5 text-rose-400" :
