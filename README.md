@@ -93,6 +93,8 @@ Open http://localhost:3000
 ## Project Status
 This is a portfolio project built to demonstrate full-stack fintech development skills. All trades are paper trades — no real funds are used or at risk. Price data for stocks and indexes is simulated; crypto prices stream live from the Binance public API.
 
+The architecture diagram reflects the full-stack design pattern this project is built around — a Node.js + Socket.IO backend proxying the Binance WebSocket stream to the React frontend. The current Vercel deployment runs the frontend layer independently, with the Binance WebSocket connecting directly from the client. A production deployment would include the Node.js server on a platform like Railway or Render to handle authentication, rate limiting, and server-side data aggregation.
+
 ## Author
 **Alex Valmyr** — Full-Stack Developer focused on fintech, trading platforms, and Web3 applications.
 GitHub: [11alexandro](https://github.com/11alexandro)

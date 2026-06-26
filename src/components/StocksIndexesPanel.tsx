@@ -10,6 +10,7 @@ import {
   BarChart4, ArrowUpRight, ArrowDownRight, Compass, Key, Play, Eye
 } from "lucide-react";
 import { useTerminal } from "../store/TerminalStateContext";
+import { marketDataService } from "../services/marketDataService";
 
 export function StocksIndexesPanel() {
   const {
@@ -96,7 +97,16 @@ export function StocksIndexesPanel() {
       {/* Visual Banner Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-white/5 gap-4">
         <div>
-          <h1 className="text-2xl font-display font-black text-white leading-none">Stocks & Indexes Desk</h1>
+          <h1 className="text-2xl font-display font-black text-white leading-none mb-2">Stocks & Indexes Desk</h1>
+          {marketDataService.dataSourceStatus === 'live' ? (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full border w-fit mb-2 text-emerald-400 bg-emerald-500/10 border-emerald-500/20">
+              <span className="animate-pulse">●</span> LIVE  Stooq delayed quotes
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full border w-fit mb-2 text-amber-400 bg-amber-500/10 border-amber-500/20">
+              <span className="animate-pulse">●</span> SIMULATED  Drift mode · prices approximate
+            </div>
+          )}
           <p className="text-[11px] text-slate-500 font-mono tracking-wider mt-1.5 uppercase font-bold">
             Simulated Global Equites Feed & Algorithmic Index Analytics
           </p>

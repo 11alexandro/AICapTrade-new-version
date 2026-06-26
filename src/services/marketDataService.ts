@@ -25,6 +25,7 @@ class MarketDataService {
   private stocksInterval: any = null;
   private driftInterval: any = null;
   private stockSourceStatus: "LIVE" | "SIMULATED" = "LIVE";
+  public dataSourceStatus: 'live' | 'simulated' = 'live';
   private emitTimeout: any = null;
   private pendingEmit = false;
 
@@ -165,86 +166,93 @@ class MarketDataService {
   }
 
   private async fetchRealStockMarketData() {
-    const symbolsToFetch = [
-      { stooq: "aapl.us", app: "AAPL" },
-      { stooq: "nvda.us", app: "NVDA" },
-      { stooq: "tsla.us", app: "TSLA" },
-      { stooq: "msft.us", app: "MSFT" },
-      { stooq: "^spx", app: "S&P 500" },
-      { stooq: "^ndx", app: "NASDAQ 100" }
-    ];
+    try {
+      const symbolsToFetch = [
+        { stooq: "aapl.us", app: "AAPL" },
+        { stooq: "nvda.us", app: "NVDA" },
+        { stooq: "tsla.us", app: "TSLA" },
+        { stooq: "msft.us", app: "MSFT" },
+        { stooq: "^spx", app: "S&P 500" },
+        { stooq: "^ndx", app: "NASDAQ 100" }
+      ];
 
-    const promises = symbolsToFetch.map(async (item) => {
-      const url = `https://stooq.com/q/l/?s=${item.stooq}&f=sd2t2ohlcv&h&e=csv`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch ${item.stooq}`);
-      }
-      const text = await res.text();
-      return { appSymbol: item.app, csvText: text };
-    });
+      const promises = symbolsToFetch.map(async (item) => {
+        const url = `https://stooq.com/q/l/?s=${item.stooq}&f=sd2t2ohlcv&h&e=csv`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch ${item.stooq}`);
+        }
+        const text = await res.text();
+        return { appSymbol: item.app, csvText: text };
+      });
 
-    const results = await Promise.allSettled(promises);
-    let successCount = 0;
+      const results = await Promise.allSettled(promises);
+      let successCount = 0;
 
-    results.forEach((res) => {
-      if (res.status === "fulfilled") {
-        const { appSymbol, csvText } = res.value;
-        try {
-          const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-          if (lines.length >= 2) {
-            const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
-            const values = lines[1].split(",").map(v => v.trim());
-            
-            const closeIdx = headers.indexOf("close");
-            const openIdx = headers.indexOf("open");
-            const highIdx = headers.indexOf("high");
-            const lowIdx = headers.indexOf("low");
-            const volIdx = headers.indexOf("volume");
-
-            if (closeIdx !== -1 && openIdx !== -1) {
-              const closeVal = parseFloat(values[closeIdx]);
-              const openVal = parseFloat(values[openIdx]);
+      results.forEach((res) => {
+        if (res.status === "fulfilled") {
+          const { appSymbol, csvText } = res.value;
+          try {
+            const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
+            if (lines.length >= 2) {
+              const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+              const values = lines[1].split(",").map(v => v.trim());
               
-              if (!isNaN(closeVal) && !isNaN(openVal) && openVal !== 0) {
-                const price = closeVal;
-                const changePercent = parseFloat((((closeVal - openVal) / openVal) * 100).toFixed(2));
+              const closeIdx = headers.indexOf("close");
+              const openIdx = headers.indexOf("open");
+              const highIdx = headers.indexOf("high");
+              const lowIdx = headers.indexOf("low");
+              const volIdx = headers.indexOf("volume");
+
+              if (closeIdx !== -1 && openIdx !== -1) {
+                const closeVal = parseFloat(values[closeIdx]);
+                const openVal = parseFloat(values[openIdx]);
                 
-                const highVal = highIdx !== -1 ? parseFloat(values[highIdx]) : price;
-                const lowVal = lowIdx !== -1 ? parseFloat(values[lowIdx]) : price;
-                const volVal = volIdx !== -1 ? parseFloat(values[volIdx]) : 0;
+                if (!isNaN(closeVal) && !isNaN(openVal) && openVal !== 0) {
+                  const price = closeVal;
+                  const changePercent = parseFloat((((closeVal - openVal) / openVal) * 100).toFixed(2));
+                  
+                  const highVal = highIdx !== -1 ? parseFloat(values[highIdx]) : price;
+                  const lowVal = lowIdx !== -1 ? parseFloat(values[lowIdx]) : price;
+                  const volVal = volIdx !== -1 ? parseFloat(values[volIdx]) : 0;
 
-                const q = this.quotes[appSymbol];
-                if (q) {
-                  const previousPrice = q.price;
-                  const direction = price > previousPrice ? "up" : price < previousPrice ? "down" : "flat";
+                  const q = this.quotes[appSymbol];
+                  if (q) {
+                    const previousPrice = q.price;
+                    const direction = price > previousPrice ? "up" : price < previousPrice ? "down" : "flat";
 
-                  this.quotes[appSymbol] = {
-                    ...q,
-                    price,
-                    changePercent,
-                    volume: isNaN(volVal) ? q.volume : volVal,
-                    direction,
-                    high: isNaN(highVal) ? q.high : highVal,
-                    low: isNaN(lowVal) ? q.low : lowVal
-                  };
-                  successCount++;
+                    this.quotes[appSymbol] = {
+                      ...q,
+                      price,
+                      changePercent,
+                      volume: isNaN(volVal) ? q.volume : volVal,
+                      direction,
+                      high: isNaN(highVal) ? q.high : highVal,
+                      low: isNaN(lowVal) ? q.low : lowVal
+                    };
+                    successCount++;
+                  }
                 }
               }
             }
+          } catch (parseErr) {
+            // Individual parsing error, skip silently
           }
-        } catch (parseErr) {
-          // Individual parsing error, skip silently
         }
-      }
-    });
+      });
 
-    if (successCount > 0) {
-      this.stockSourceStatus = "LIVE";
-      this.emitUpdates();
-    } else {
-      this.stockSourceStatus = "SIMULATED";
-      throw new Error("All Stooq symbol fetches failed or returned invalid CSV.");
+      if (successCount > 0) {
+        this.stockSourceStatus = "LIVE";
+        this.dataSourceStatus = "live";
+        this.emitUpdates();
+      } else {
+        this.stockSourceStatus = "SIMULATED";
+        this.dataSourceStatus = "simulated";
+        throw new Error("All Stooq symbol fetches failed or returned invalid CSV.");
+      }
+    } catch (err) {
+      this.dataSourceStatus = "simulated";
+      throw err;
     }
   }
 
