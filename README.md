@@ -13,7 +13,7 @@ I built this project to demonstrate that I understand both the financial concept
 AICapTrade implements high-fidelity real-time simulation, algorithmic monitoring, and deep performance metrics in a fully interactive, production-grade terminal dashboard.
 
 **Live Crypto Price Streaming**
-Connects to the Binance public WebSocket (wss://stream.binance.com:9443) for real-time BTC/USDT, ETH/USDT, SOL/USDT and XRP/USDT price feeds. Prices are seeded from the Binance REST API on startup to establish accurate day-open baselines before the WebSocket connects — eliminating the race condition where stale percentage-change values appear on first tick. A volume decay formula prevents accumulation artifacts from the high-frequency trade stream.
+Connects to the Binance public WebSocket (wss://stream.binance.com:9443) for real-time BTC/USDT, ETH/USDT, SOL/USDT and XRP/USDT price feeds. Prices are seeded from the Binance REST API on startup to establish accurate day-open baselines before the WebSocket connects eliminating the race condition where stale percentage-change values appear on first tick. A volume decay formula prevents accumulation artifacts from the high-frequency trade stream.
 
 **Stocks & Indexes Desk**
 Tracks AAPL, NVDA, TSLA, MSFT, the S&P 500 and NASDAQ 100 with real-time drift simulation keeping prices visibly moving between polling intervals. A clearly visible "SIMULATED DATA · PAPER TRADING ONLY" badge in the header makes the data sourcing transparent.
@@ -74,7 +74,7 @@ The frontend subscribes to Socket.IO which proxies the Binance stream, and Termi
 
 I designed the core entry trigger around a momentum-reversal concept, where the bot monitors for a 2% price drop within any 10-minute rolling window. This is a classic momentum entry technique; when a liquid asset drops sharply in a short window, it often signals temporary institutional selling pressure or a news catalyst, which can quickly lead to a mean-reversion bounce or a strong breakout trade. I chose 2%/10min as the threshold because it filters out normal intraday noise while reliably catching genuine momentum moves.
 
-To manage risk, I built parameters into the risk console that ensure every simulated trade uses configurable stop-loss and take-profit percentages. On real trading desks, these guardrails are not optional—they define the risk-reward ratio and capital preservation rules before a position is even opened. For example, setting a 2% stop-loss with a 4.5% take-profit provides a clear 1:2.25 risk-to-reward ratio, which is standard practice for short-term momentum strategies to remain profitable over time.
+To manage risk, I built parameters into the risk console that ensure every simulated trade uses configurable stop-loss and take-profit percentages. On real trading desks, these guardrails are not optional they define the risk-reward ratio and capital preservation rules before a position is even opened. For example, setting a 2% stop-loss with a 4.5% take-profit provides a clear 1:2.25 risk-to-reward ratio, which is standard practice for short-term momentum strategies to remain profitable over time.
 
 For pattern detection, I implemented a strategy scanner that evaluates historical price state buffers in memory. The scanner looks for VWAP Reversals, which occur when the price crosses back above or below the Volume Weighted Average Price a key intraday benchmark used by institutions paired with RSI extremes. It also detects ABCD harmonic patterns to identify geometric support and resistance pivots, alongside Bull and Bear Flag continuation patterns that signal when consolidations are about to break out in the direction of the trend. These are the exact technical indicators that any professional trader on a proprietary desk would expect to check.
 
@@ -91,7 +91,7 @@ npm run dev
 Open [aicaptrade.vercel.app](aicaptrade.vercel.app)
 
 ## Project Status
-This is a portfolio project built to demonstrate full-stack fintech development skills. All trades are paper trades — no real funds are used or at risk. Price data for stocks and indexes is simulated; crypto prices stream live from the Binance public API.
+This is a portfolio project built to demonstrate full-stack fintech development skills. All trades are paper trades no real funds are used or at risk. Price data for stocks and indexes is simulated; crypto prices stream live from the Binance public API.
 
 The architecture diagram reflects the full-stack design pattern this project is built around a Node.js + Socket.IO backend proxying the Binance WebSocket stream to the React frontend. The current Vercel deployment runs the frontend layer independently, with the Binance WebSocket connecting directly from the client. A production deployment would include the Node.js server on a platform like Railway or Render to handle authentication, rate limiting, and server-side data aggregation.
 
